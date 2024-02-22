@@ -22,10 +22,26 @@ public class OXOController {
             gameModel.setCurrentPlayerNumber(0);
         }
     }
-    public void addRow() {}
-    public void removeRow() {}
-    public void addColumn() {}
-    public void removeColumn() {}
+    public void addRow() {
+        if(gameModel.getNumberOfRows()<9){
+            gameModel.addRow();
+        }
+    }
+    public void removeRow() {
+        if(gameModel.getNumberOfRows()>3){
+            gameModel.removeRow();
+        }
+    }
+    public void addColumn() {
+        if(gameModel.getNumberOfColumns()<9){
+            gameModel.addColumn();
+        }
+    }
+    public void removeColumn() {
+        if(gameModel.getNumberOfColumns()>3){
+            gameModel.removeColumn();
+        }
+    }
     public void increaseWinThreshold() {}
     public void decreaseWinThreshold() {}
     public void reset() {
