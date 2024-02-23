@@ -125,11 +125,6 @@ public class OXOModel {
     }
 
     public void removeColumn() {
-//        for (ArrayList<OXOPlayer> row : cells) {
-//            if (!row.isEmpty()) {
-//                row.remove(row.size() - 1); // 从末尾开始移除列
-//            }
-//        }
         if (!cells.isEmpty()) {
             boolean isEmpty = true;
             for (ArrayList<OXOPlayer> row : cells) {
@@ -149,5 +144,60 @@ public class OXOModel {
                 }
             }
         }
+    }
+    public OXOPlayer horizonWin() {
+        int tot_row = getNumberOfRows();
+        int tot_col = getNumberOfColumns();
+        // 以短边作为赢的条件 -- min函数
+        setWinThreshold(Math.min(tot_col, tot_row));
+        // For循环 - 在一row里连续六个-胜利阈值是每一列都有连续的
+        for (int i = 0; i < tot_row; i++) {
+            for (int j = 0; j < tot_col; j++) {
+                if (getCellOwner(i, j) != null) {
+                    int win_cnt = 1;
+                    for (int k = 1; k < tot_col - j; k++) {
+                        int nxrgt = j + k; // 他右边的应该+k 而不是+1
+                        if (nxrgt > tot_col || (getCellOwner(i, j) != getCellOwner(i, nxrgt))) {
+                            break;
+                        }
+                        win_cnt++;
+                    }
+                    if (win_cnt >= getWinThreshold()) {
+                        setWinner(getCellOwner(i, j));
+                        return getWinner();
+                    }
+                }
+            }
+        }
+        return null;
+    }
+    public OXOPlayer verticalWin() {
+        int tot_row = getNumberOfRows();
+        int tot_col = getNumberOfColumns();
+        // 以短边作为赢的条件 -- min函数
+        setWinThreshold(Math.min(tot_col, tot_row));
+        // For循环 - 在一row里连续六个-胜利阈值是每一行都有连续的
+        for (int i = 0; i < tot_col; i++) {
+            for (int j = 0; j < tot_row; j++) {
+                if (getCellOwner(j, i) != null) {
+                    int win_cnt = 1;
+                    for (int k = 1; k < tot_row - j; k++) {
+                        int nxblw = j + k; // 他右边的应该+k 而不是+1
+                        if (nxblw > tot_row || (getCellOwner(i, j) != getCellOwner(i, nxblw))) {
+                            break;
+                        }
+                        win_cnt++;
+                    }
+                    if (win_cnt >= getWinThreshold()) {
+                        setWinner(getCellOwner(j, i));
+                        return getWinner();
+                    }
+                }
+            }
+        }
+        return null;
+    }
+    public OXOPlayer diagonalWin() {
+        return null;
     }
 }
