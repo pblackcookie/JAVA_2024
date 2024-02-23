@@ -14,25 +14,42 @@ public class OXOController implements KeyListener {
     }
 
     public void handleIncomingCommand(String command) throws OXOMoveException {
-        while (gameEnded) {
+        while (gameEnded && (!gameModel.isGameDrawn())) {
             KeyEvent e1 = null;
             keyReleased(e1);
+            break;
         }
         // Parse the command and update the game state accordingly
-        int row = command.toLowerCase().charAt(0) - 'a'; // Convert letter to row index
-        int col = Character.getNumericValue(command.charAt(1)) - 1; // Convert number to column index
+        String itsRow = command.replaceAll("[^a-zA-Z]", "").toLowerCase();
+        String itsCol = command.replaceAll("[^0-9]", "");
+        int row = itsRow.toLowerCase().charAt(0) - 'a'; // Convert letter to row index
+        int col = Integer.parseInt(itsCol) - 1; // Convert number to column index
         int gamePlayer = gameModel.getCurrentPlayerNumber();
         OXOPlayer nowPlayer = gameModel.getPlayerByNumber(gamePlayer);
-        // flag to set
+        // row and col error
+//        int min_row = 3, max_row = 9;
+//        int min_col = 3, max_col = 9;
+//        if(row < min_row || row > max_row){
+//            throw new OXOMoveException.InvalidIdentifierCharacterException(OXOMoveException.RowOrColumn.ROW,(char)row);
+//        }
+//        if(col < min_col || col > max_col){
+//            throw new OXOMoveException.InvalidIdentifierCharacterException(OXOMoveException.RowOrColumn.COLUMN,(char)col);
+//        }
+        // o x -> board -> set is null -> can set cell
+        if (gameModel.getCellOwner(row,col)==null) {
+            gameModel.setCellOwner(row, col, nowPlayer);
+            // switch -> o & x (only two players)
+            if (gamePlayer == 0) {
+                gameModel.setCurrentPlayerNumber(1);
+            } else {
+                gameModel.setCurrentPlayerNumber(0);
+            }
 
-        // o x -> board -> set
-        gameModel.setCellOwner(row, col, nowPlayer);
-        // switch -> o & x (only 两个玩家)
-        if (gamePlayer == 0) {
-            gameModel.setCurrentPlayerNumber(1);
-        } else {
-            gameModel.setCurrentPlayerNumber(0);
+        }else{
+            throw new OXOMoveException.CellAlreadyTakenException(row,col);
         }
+
+        // TASK5 - Winner check
         OXOPlayer winPlayer = gameModel.horizonWin();
         if (winPlayer != null) {
             gameEnded = true;
@@ -47,6 +64,12 @@ public class OXOController implements KeyListener {
                 }
             }
         }
+        // winner check -- game drawn
+        if(winPlayer == null){
+            //gameEnded = true;
+            gameModel.isGameDrawn();
+        }
+
     }
     public void addRow() {
         if(gameModel.getNumberOfRows()<9){

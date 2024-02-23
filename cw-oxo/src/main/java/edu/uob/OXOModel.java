@@ -87,6 +87,19 @@ public class OXOModel {
     }
 
     public boolean isGameDrawn() {
+        int numRows = getNumberOfRows();
+        int numCols = getNumberOfColumns();
+        setGameDrawn(true);
+        // 遍历整个游戏板
+        for (int row = 0; row < numRows; row++) {
+            for (int col = 0; col < numCols; col++) {
+                // 如果任何一个单元格为空，则游戏尚未结束
+                if (getCellOwner(row, col) == null) {
+                    setGameDrawn(false);
+                    break;
+                }
+            }
+        }
         return gameDrawn;
     }
 
@@ -150,9 +163,9 @@ public class OXOModel {
         int tot_col = getNumberOfColumns();
         // 以短边作为赢的条件 -- min函数
         setWinThreshold(Math.min(tot_col, tot_row));
-        // For循环 - 在一row里连续六个-胜利阈值是每一列都有连续的
-        for (int i = 0; i < tot_row; i++) {
-            for (int j = 0; j < tot_col; j++) {
+        // For循环 - 在一row里连续col个-胜利阈值是每一列都有连续的
+        for (int i = 0; i <= tot_row - getWinThreshold(); i++) {
+            for (int j = 0; j <= tot_col- getWinThreshold(); j++) {
                 if (getCellOwner(i, j) != null) {
                     int win_cnt = 1;
                     for (int k = 1; k < tot_col - j; k++) {
@@ -176,20 +189,22 @@ public class OXOModel {
         int tot_col = getNumberOfColumns();
         // 以短边作为赢的条件 -- min函数
         setWinThreshold(Math.min(tot_col, tot_row));
-        // For循环 - 在一row里连续六个-胜利阈值是每一行都有连续的
-        for (int i = 0; i < tot_col; i++) {
-            for (int j = 0; j < tot_row; j++) {
-                if (getCellOwner(j, i) != null) {
+        // For循环 - 在一col里连续row个-胜利阈值是每一行都有连续的
+        // tot_col - getWinThreshold -> make sure the left col/row satisfied
+        // the win requirements
+        for (int j = 0; j <= tot_col - getWinThreshold(); j++) {
+            for (int i = 0; i <= tot_row - getWinThreshold(); i++) {
+                if (getCellOwner(i, j) != null) {
                     int win_cnt = 1;
-                    for (int k = 1; k < tot_row - j; k++) {
-                        int nxblw = j + k; // 他右边的应该+k 而不是+1
-                        if (nxblw > tot_row || (getCellOwner(i, j) != getCellOwner(i, nxblw))) {
+                    for (int k = 1; k < tot_row - i; k++) {
+                        int nxblw = i + k; // 他右边的应该+k 而不是+1
+                        if (nxblw > tot_row || (getCellOwner(i, j) != getCellOwner(nxblw, j))) {
                             break;
                         }
                         win_cnt++;
                     }
                     if (win_cnt >= getWinThreshold()) {
-                        setWinner(getCellOwner(j, i));
+                        setWinner(getCellOwner(i, j));
                         return getWinner();
                     }
                 }
@@ -198,6 +213,47 @@ public class OXOModel {
         return null;
     }
     public OXOPlayer diagonalWin() {
+        int tot_row = getNumberOfRows();
+        int tot_col = getNumberOfColumns();
+        setWinThreshold(Math.min(tot_col, tot_row));
+        // Check main diagonal
+        for (int i = 0; i <= tot_row - getWinThreshold(); i++) {
+            for (int j = 0; j <= tot_col - getWinThreshold(); j++) {
+                // OXOPlayer player = getCellOwner(i, j);
+                if (getCellOwner(i, j) != null) {
+                    boolean win = true;
+                    for (int k = 1; k < getWinThreshold(); k++) {
+                        if (!getCellOwner(i, j).equals(getCellOwner(i + k, j + k))) {
+                            win = false;
+                            break;
+                        }
+                    }
+                    if (win) {
+                        setWinner(getCellOwner(i, j));
+                        return getWinner();
+                    }
+                }
+            }
+        }
+        // check side diagonal
+        for (int i = 0; i <= tot_row - getWinThreshold(); i++) {
+            for (int j = getWinThreshold() - 1; j < tot_col; j++) {
+                // OXOPlayer player = getCellOwner(i, j);
+                if (getCellOwner(i, j) != null) {
+                    boolean win = true;
+                    for (int k = 1; k < getWinThreshold(); k++) {
+                        if (!getCellOwner(i, j).equals(getCellOwner(i + k, j - k))) {
+                            win = false;
+                            break;
+                        }
+                    }
+                    if (win) {
+                        setWinner(getCellOwner(i, j));
+                        return getWinner();
+                    }
+                }
+            }
+        }
         return null;
     }
 }
